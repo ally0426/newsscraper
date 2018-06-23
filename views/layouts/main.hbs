@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="navbar-fixed">
+        <nav>
+            <div class="nav-wrapper">
+                <a href="/" class="brand-logo left">News Scraper</a>
+                <ul id="nav-mobile" class="right">
+                    <li><a href="http://www.koreaherald.com/" target="_blank">Tech Crunch</a></li>
+                </ul>
+                <ul id="nav-mobile" class="right">
+                    <li><a href="/article">Saved Articles</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+    {{{ body }}}
+    <div id="modal-index" class="modal">
+        <div id="modal-index-content" class="modal-content center">
+        </div>
+        <div class="modal-footer center">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green"><i class="material-icons right">done</i></a>
+        </div>
+    </div>
+    <footer class="page-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col l6 s12">
+                    <h5 class="white-text">Footer Content</h5>
+                </div>
+                <div class="col l4 offset-l2 s12">
+                    <h5 class="white-text">Links</h5>
+                </div>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="container">
+                © 2018 Copyright Youngmi
+                <a class="grey-text text-lighten-4 right" href="https://github.com/ally0426/newsscraper" target="_blank">Github</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
