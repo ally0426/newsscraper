@@ -27,39 +27,36 @@ module.exports = function (app) {
     // A GET request to scrape the echojs website
     app.get("/scrape", function (req, res) {
         // First, we grab the body of the html with request
-        request("http://www.koreaherald.com/list.php?ct=020206000000", function (error, response, html) {
+        request("http://www.techcrunch.com", function (error, response, html) {
             // Then, we load that into cheerio and save it to $ for a shorthand selector
             var $ = cheerio.load(html);
             //console.log(html);
+
             // Now, we grab every h2 within an article tag, and do the following:
             $("details").each(function (i, element) {
 
                 // Save an empty result object
                 var result = {};
-                // var title = $(this).children("h3").text();
-                // var body = $(this).children("p").text();
-                // var link = $(this).children("h3").children("a").attr("href");
-
-                // console.log(title, body, link);
 
                 // Add the text and href of every link, and save them as properties of the result object
-                result.title = $(this).children("h3").text();
+                result.title = $(this).children("h2").text();
                 result.body = $(this).children("p").text();
-                result.link = $(this).children("h3").children("a").attr("href");
+                result.link = $(this).children("h2").children("a").attr("href");
+                // console.log(title, body, link);
 
                 // Using our Article model, create a new entry
                 // This effectively passes the result object to the entry (and the title and link)
                 var entry = new Article(result);
 
                 // Now, save that entry to the db
-                entry.save(function (err, doc) {
+                entry.save(function (err, data) {
                     // Log any errors
                     if (err) {
                         console.log(err);
                     }
-                    // Or log the doc
+                    // Or log the data
                     else {
-                        console.log(doc);
+                        console.log(data);
                     }
                 });
 
@@ -73,14 +70,14 @@ module.exports = function (app) {
     // This will get the articles we scraped from the mongoDB
     app.get("/articles", function (req, res) {
         // Grab every doc in the Articles array
-        Article.find({}, function (error, doc) {
+        Article.find({}, function (err, data) {
             // Log any errors
-            if (error) {
-                console.log(error);
+            if (err) {
+                console.log(err);
             }
-            // Or send the doc to the browser as a json object
+            // Or send the data to the browser as a json object
             else {
-                res.json(doc);
+                res.json(data);
             }
         });
     });
@@ -94,14 +91,14 @@ module.exports = function (app) {
             // ..and populate all of the notes associated with it
             .populate("notes")
             // now, execute our query
-            .exec(function (error, doc) {
+            .then(function (err, data) {
                 // Log any errors
-                if (error) {
-                    console.log(error);
+                if (err) {
+                    console.log(err);
                 }
                 // Otherwise, send the doc to the browser as a json object
                 else {
-                    res.json(doc);
+                    res.json(data);
                 }
             });
     });
@@ -114,10 +111,10 @@ module.exports = function (app) {
         console.log(newNote);
 
         // And save the new note the db
-        newNote.save(function (error, doc) {
+        newNote.save(function (err, result) {
             // Log any errors
-            if (error) {
-                console.log(error);
+            if (err) {
+                console.log(err);
             }
             // Otherwise
             else {
@@ -126,17 +123,17 @@ module.exports = function (app) {
                         "_id": req.params.id
                     }, {
                         $push: {
-                            "notes": doc._id
+                            "notes": result._id
                         }
                     })
                     // Execute the above query
-                    .exec(function (err, doc) {
+                    .then(function (err, data) {
                         // Log any errors
                         if (err) {
                             console.log(err);
                         } else {
-                            // Or send the document to the browser
-                            res.send(doc);
+                            // Or send data to the browser
+                            res.send(data);
                         }
                     });
             }
@@ -154,13 +151,13 @@ module.exports = function (app) {
                 "saved": req.body.saved
             })
             // Execute the above query
-            .exec(function (err, doc) {
+            .then(function (err, result) {
                 // Log any errors
                 if (err) {
                     console.log(err);
                 } else {
-                    // Or send the document to the browser
-                    res.send(doc);
+                    // Or send the result to the browser
+                    res.send(result);
                 }
             });
     });
@@ -172,13 +169,13 @@ module.exports = function (app) {
                 "_id": req.params.id
             })
             // Execute the above query
-            .exec(function (err, doc) {
+            .then(function (err, result) {
                 // Log any errors
                 if (err) {
                     console.log(err);
                 } else {
-                    // Or send the document to the browser
-                    res.send(doc);
+                    // Or send the result to the browser
+                    res.send(result);
                 }
             });
     });
@@ -190,13 +187,13 @@ module.exports = function (app) {
                 "_id": req.params.id
             })
             // Execute the above query
-            .exec(function (err, doc) {
+            .then(function (err, result) {
                 // Log any errors
                 if (err) {
                     console.log(err);
                 } else {
-                    // Or send the document to the browser
-                    res.send(doc);
+                    // Or send the result to the browser
+                    res.send(result);
                 }
             });
     });
