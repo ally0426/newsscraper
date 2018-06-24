@@ -1,28 +1,14 @@
-// Require mongoose (dependencies)
-var mongoose = require('mongoose');
-// Create a schema class
+var mongoose = require("mongoose");
+
+// Save a reference to the Schema constructor
 var Schema = mongoose.Schema;
 
-// Create the Note schema
+//The Note Schema constructor
 var NoteSchema = new Schema({
-    _article: {
-        type: String,
-        ref: 'Article'
-    },
-    text: {
-        type: String
-    },
-    timestamp: {
-        type: Date,
-        default: Date.now
-    }
+  title: String,
+  body: String
 });
 
-// Remember, Mongoose will automatically save the ObjectIds of the notes
-// These ids are referred to in the Article model
-
-// // Create the Note model with the NoteSchema
 var Note = mongoose.model("Note", NoteSchema);
 
-// // Export the Note model
 module.exports = Note;
