@@ -41,7 +41,7 @@ app.set("view engine", "hbs");
 require("./routes/api-routes.js")(app);
 
 // Database configuration with mongoose
-var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+var MONGODB_URI = "mongodb://heroku_4h3h27vx:c46ero1fqmulot4sapvsb48nh@ds117101.mlab.com:17101/heroku_4h3h27vx" || "mongodb://localhost/mongoHeadlines";
 // Set mongoose to leverage built in JavaScript ES6 Promises and connect to Mongo DB
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI);
