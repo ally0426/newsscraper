@@ -70,7 +70,7 @@ module.exports = function (app) {
     // This will get the articles we scraped from the mongoDB
     app.get("/articles", function (req, res) {
         // Grab every doc in the Articles array
-        Article.find({}, function (err, data) {
+        Article.findAll({}, function (err, data) {
             // Log any errors
             if (err) {
                 console.log(err);
