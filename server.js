@@ -1,54 +1,36 @@
 // Dependencies
 var express = require("express");
-var hbs = require("express-handlebars");
+var exphbs = require("express-handlebars");
+var methodOverride = require('method-override');
 var bodyParser = require("body-parser");
 var logger = require("morgan");
 var mongoose = require("mongoose");
-
-// Requiring our Note and Article models
-var Note = require("./models/Note.js");
-var Article = require("./models/Article.js");
-
-// Our scraping tools
-var request = require("request");
-var cheerio = require("cheerio");
-
+var PORT = process.env.PORT || 3000;
+// Set mongoose to leverage built in JavaScript ES6 Promises
+mongoose.Promise = Promise;
 
 // Initialize Express
 var app = express();
 
-// // Use morgan and body parser with our app
-// app.use(logger("dev"));
-// app.use(bodyParser.urlencoded({
-//   extended: false
-// }));
-
-// Sets up the Express app to handle data parsing
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.text());
-app.use(bodyParser.json({ type: "application/vnd.api+json" }));
-
+// Use morgan and body parser with our app
+app.use(logger("dev"));
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 
 // Make public a static dir
-app.use(express.static("public"));
+app.use(express.static(__dirname + "/public"));
 
-// Set Handlebars.
-app.engine("hbs", hbs({extname: "hbs", defaultLayout: "main", layoutsDir: __dirname + "/views/layouts" }));
-app.set("view engine", "hbs");
+// Override with POST having ?_method=DELETE
+app.use(methodOverride('_method'));
 
-// Routes =============================================================
-require("./routes/api-routes.js")(app);
-
-// Database configuration with mongoose
-var MONGODB_URI = "mongodb://heroku_4h3h27vx:c46ero1fqmulot4sapvsb48nh@ds117101.mlab.com:17101/heroku_4h3h27vx" || "mongodb://localhost/mongoHeadlines";
-// Set mongoose to leverage built in JavaScript ES6 Promises and connect to Mongo DB
-mongoose.Promise = Promise;
-mongoose.connect(MONGODB_URI);
-
+// Database configuration with local mongoose db connection
+mongoose.connect("mongodb://heroku_4h3h27vx:c46ero1fqmulot4sapvsb48nh@ds117101.mlab.com:17101/heroku_4h3h27vx" || "mongodb://localhost/mongoHeadlines");
 var db = mongoose.connection;
 
-var PORT = process.env.PORT || 3000;
+// Setup handlebars
+app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.set("view engine", "handlebars");
 
 // Show any mongoose errors
 db.on("error", function(error) {
@@ -64,3 +46,6 @@ db.once("open", function() {
 app.listen(PORT, function() {
   console.log("App running on port 3000!");
 });
+
+// Require routes from controllers
+require('./controllers/controllers.js')(app);
