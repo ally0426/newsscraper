@@ -1,51 +1,116 @@
-// Dependencies
-var express = require("express");
-var exphbs = require("express-handlebars");
-var methodOverride = require('method-override');
-var bodyParser = require("body-parser");
-var logger = require("morgan");
+// require packages
 var mongoose = require("mongoose");
-var PORT = process.env.PORT || 3000;
-// Set mongoose to leverage built in JavaScript ES6 Promises
-mongoose.Promise = Promise;
-
-// Initialize Express
+var express = require("express");
+var bodyParser = require("body-parser");
+var hbars = require("express-handlebars");
+var cheerio = require("cheerio");
+var request = require("request");
+// require models
+var db = require("./models");
+// instantiate app
+var PORT = process.env.PORT || 9000; 
 var app = express();
+// configure middleware
+app.use(express.static("public"));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.text());
+app.use(bodyParser.json({ type: "application/vnd.api+json" }));
 
-// Use morgan and body parser with our app
-app.use(logger("dev"));
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
-
-// Make public a static dir
-app.use(express.static(__dirname + "/public"));
-
-// Override with POST having ?_method=DELETE
-app.use(methodOverride('_method'));
-
-// Database configuration with local mongoose db connection
-mongoose.connect("mongodb://heroku_4h3h27vx:c46ero1fqmulot4sapvsb48nh@ds117101.mlab.com:17101/heroku_4h3h27vx" || "mongodb://localhost/mongoHeadlines");
-var db = mongoose.connection;
-
-// Setup handlebars
-app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.engine("handlebars", hbars({ defaultLayout: "main"}));
 app.set("view engine", "handlebars");
+// connect to db
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+mongoose.Promise = Promise;
+mongoose.connect(MONGODB_URI);
 
-// Show any mongoose errors
-db.on("error", function(error) {
-  console.log("Mongoose Error: ", error);
+// require routes
+// require("./routes/dataRoutes.js")(app);
+app.get("/scrape", function (req, res) {
+    request("https://lifehacker.com/tag/programming", function(error, response, body) {
+    var $ = cheerio.load(response.body);
+    
+$("article").each(function(i, element) {
+    var result = {};
+    result.title = $(element)
+        .find("header > h1 > a")
+        .text();
+    result.link = $(element)
+        .find("header > h1 > a")
+        .attr("href");
+    result.body = $(element)
+        .find("div > div > p") 
+        .text();  
+        // console.log(result);
+    db.Article
+    .create(result)
+    .then(function(dbArticle) {
+      console.log(dbArticle);
+    })
+    .catch(function(err) {
+      return res.json(err);
+    });
+});
+console.log("scrape complete");
+res.send("Scrape Complete")
+});
+    
 });
 
-// Once logged in to the db through mongoose, log a success message
-db.once("open", function() {
-  console.log("Mongoose connection successful.");
-});
+app.get("/", function(req, res) {
+    db.Article.find({})
+    .then(function(dbArticle) {
+        var obj = {
+            article: dbArticle
+        }
+      res.render("index", obj);
+    })
+    .catch(function(err) {
+      res.json(err);
+    })
+  });
 
-// Listen on port 3000
+  app.get("/articles/:id", function(req, res) {
+    db.Article.findOne({_id: req.params.id})
+    .populate("note")
+    .then(function(dbArticle) {
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      res.json(err);
+    })
+  });
+
+  app.post("/articles/:id", function(req, res) {
+    db.Note
+      .create(req.body)
+      .then(function(dbNote) {
+        return db.Article.findOneAndUpdate({_id: req.params.id}, {note: dbNote._id}, { new: true });
+      })
+      .then(function(dbArticle) {
+        res.json(dbArticle);
+      })
+      .catch(function(err) {
+        res.json(err);
+      });
+  });
+  app.delete("/delete", function(req, res) {
+    db.Article.remove({}, function(err) {
+      if (err) {
+        console.log(err);
+      }
+    });
+    db.Note.remove({}, function(err) {
+      if (err) {
+        console.log(err);
+      }
+    });
+    res.end();
+  })
+
+
+// listen
+
 app.listen(PORT, function() {
-  console.log("App running on port 3000!");
+    console.log("App is listening on port: " + PORT);
 });
-
-// Require routes from controllers
-require('./controllers/controllers.js')(app);

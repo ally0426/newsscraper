@@ -1,0 +1,15 @@
+.jumbotron {
+    background-image: url("../images/picture.jpg");
+    text-align: center;
+    height: 100%;
+    width: 100%;
+}
+#a {
+    color: black;
+}
+.getNote {
+    margin-top: 10px;
+}
+#pans {
+    margin-top: 20px;
+}
