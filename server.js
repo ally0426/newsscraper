@@ -20,7 +20,7 @@ app.use(bodyParser.json({ type: "application/vnd.api+json" }));
 app.engine("handlebars", hbars({ defaultLayout: "main"}));
 app.set("view engine", "handlebars");
 // connect to db
-var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+var MONGODB_URI = "mongodb://heroku_4h3h27vx:c46ero1fqmulot4sapvsb48nh@ds117101.mlab.com:17101/heroku_4h3h27vx" || "mongodb://localhost/mongoHeadlines";
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI);
 
